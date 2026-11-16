@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f6f4">
+    <title>Student Enrollment</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #1d2926;
+            --muted: #64716d;
+            --line: #d7dfdb;
+            --surface: #ffffff;
+            --page: #f3f6f4;
+            --accent: #176f5b;
+            --accent-hover: #105b4a;
+            --focus: #e1a34a;
+            --danger: #a63e36;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            margin: 0;
+            background: linear-gradient(135deg, #f8faf8 0%, var(--page) 55%, #eaf1ed 100%);
+            color: var(--ink);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        main {
+            width: min(100% - 32px, 760px);
+            margin: 56px auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 34px;
+            font-weight: 500;
+        }
+
+        .form-panel {
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            box-shadow: 0 12px 32px rgb(26 55 44 / 6%);
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px 18px;
+        }
+
+        .field {
+            display: grid;
+            min-width: 0;
+            gap: 7px;
+            color: #34423d;
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .field--wide {
+            grid-column: 1 / -1;
+        }
+
+        .required-mark {
+            color: var(--accent);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #bdc9c3;
+            border-radius: 4px;
+            background: #fff;
+            color: var(--ink);
+            font: inherit;
+            font-weight: 400;
+        }
+
+        textarea {
+            min-height: 88px;
+            resize: vertical;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #899590;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            outline: 3px solid color-mix(in srgb, var(--focus) 42%, transparent);
+            outline-offset: 1px;
+        }
+
+        input:disabled,
+        textarea:disabled {
+            background: #f1f4f2;
+            color: #66716d;
+            cursor: not-allowed;
+        }
+
+        .status {
+            min-height: 24px;
+            margin-top: 20px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .status[data-kind="error"] {
+            color: var(--danger);
+        }
+
+        .status[data-kind="success"] {
+            color: var(--accent);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid #e6ebe8;
+        }
+
+        button {
+            min-width: 100px;
+            min-height: 42px;
+            padding: 9px 16px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            background: var(--accent);
+            color: #fff;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        button:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent);
+            outline-offset: 2px;
+        }
+
+        button.secondary {
+            border-color: var(--line);
+            background: #fff;
+            color: var(--ink);
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background: #f4f7f5;
+        }
+
+        button:disabled {
+            background: #e5ebe8;
+            color: #899590;
+            cursor: not-allowed;
+        }
+
+        button.secondary:disabled {
+            border-color: #e5ebe8;
+            background: #f6f8f7;
+        }
+
+        .form-panel[aria-busy="true"] {
+            cursor: progress;
+        }
+
+        @media (max-width: 560px) {
+            main {
+                margin: 32px auto;
+            }
+
+            .form-panel {
+                padding: 20px;
+            }
+
+            .field-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .field--wide {
+                grid-column: auto;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <p class="eyebrow">School records</p>
+            <h1>Student enrollment</h1>
+        </header>
+
+        <form id="studentForm" class="form-panel" novalidate aria-busy="false">
+            <div class="field-grid">
+                <label class="field" for="rollNo">
+                    <span>Roll No. <span class="required-mark" aria-hidden="true">*</span></span>
+                    <input id="rollNo" name="Roll-No" type="text" autocomplete="off" required>
+                </label>
+
+                <label class="field" for="fullName">
+                    <span>Full Name <span class="required-mark" aria-hidden="true">*</span></span>
+                    <input id="fullName" name="Full-Name" type="text" autocomplete="name" required disabled>
+                </label>
+
+                <label class="field" for="studentClass">
+                    <span>Class <span class="required-mark" aria-hidden="true">*</span></span>
+                    <input id="studentClass" name="Class" type="text" required disabled>
+                </label>
+
+                <label class="field" for="birthDate">
+                    <span>Birth Date <span class="required-mark" aria-hidden="true">*</span></span>
+                    <input id="birthDate" name="Birth-Date" type="date" required disabled>
+                </label>
+
+                <label class="field" for="enrollmentDate">
+                    <span>Enrollment Date <span class="required-mark" aria-hidden="true">*</span></span>
+                    <input id="enrollmentDate" name="Enrollment-Date" type="date" required disabled>
+                </label>
+
+                <label class="field field--wide" for="address">
+                    <span>Address <span class="required-mark" aria-hidden="true">*</span></span>
+                    <textarea id="address" name="Address" autocomplete="street-address" required disabled></textarea>
+                </label>
+            </div>
+
+            <div id="formStatus" class="status" role="status" aria-live="polite"></div>
+
+            <div class="actions">
+                <button id="saveButton" type="submit" disabled>Save</button>
+                <button id="updateButton" type="submit" disabled>Update</button>
+                <button id="resetButton" class="secondary" type="button" disabled>Reset</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const DATABASE_URL = "https://api.login2explore.com:5577";
+        const DATABASE_NAME = "SCHOOL-DB";
+        const RELATION_NAME = "STUDENT-TABLE";
+        const CONNECTION_TOKEN = "replaceWithYourConnectionToken"; // Replace with your actual connection token
+        const API_FIELDS = ["Roll-No", "Full-Name", "Class", "Birth-Date", "Address", "Enrollment-Date"];
+
+        const form = document.getElementById("studentForm");
+        const rollNoInput = document.getElementById("rollNo");
+        const detailInputs = [
+            document.getElementById("fullName"),
+            document.getElementById("studentClass"),
+            document.getElementById("birthDate"),
+            document.getElementById("address"),
+            document.getElementById("enrollmentDate")
+        ];
+        const saveButton = document.getElementById("saveButton");
+        const updateButton = document.getElementById("updateButton");
+        const resetButton = document.getElementById("resetButton");
+        const statusMessage = document.getElementById("formStatus");
+
+        let formState = "initial";
+        let currentRecordNumber = null;
+        let requestVersion = 0;
+
+        function setStatus(message, kind = "info") {
+            statusMessage.textContent = message;
+            statusMessage.dataset.kind = kind;
+        }
+
+        function setDetailsEnabled(enabled) {
+            detailInputs.forEach((input) => {
+                input.disabled = !enabled;
+            });
+        }
+
+        function setButtons({ save = false, update = false, reset = false } = {}) {
+            saveButton.disabled = !save;
+            updateButton.disabled = !update;
+            resetButton.disabled = !reset;
+        }
+
+        function setBusy(message) {
+            form.setAttribute("aria-busy", "true");
+            rollNoInput.disabled = true;
+            setDetailsEnabled(false);
+            setButtons();
+            setStatus(message);
+        }
+
+        function resetForm(message = "Enter a Roll No. to check the student record.") {
+            requestVersion += 1;
+            form.reset();
+            formState = "initial";
+            currentRecordNumber = null;
+            form.setAttribute("aria-busy", "false");
+            rollNoInput.disabled = false;
+            setDetailsEnabled(false);
+            setButtons();
+            setStatus(message, message.startsWith("Student record") ? "success" : "info");
+            rollNoInput.focus();
+        }
+
+        function parseJsonValue(value) {
+            if (typeof value !== "string") {
+                return value;
+            }
+
+            try {
+                return JSON.parse(value);
+            } catch {
+                return value;
+            }
+        }
+
+        function extractStudentRecord(response) {
+            let record = parseJsonValue(response.data);
+            if (Array.isArray(record)) {
+                record = record[0];
+            }
+            if (!record || typeof record !== "object") {
+                return null;
+            }
+
+            let recordNumber = record.rec_no ?? record.recordNo ?? record.recordNumber;
+            let student = record.json ?? record.jsonStr ?? record.student ?? record.value ?? record.recordData;
+            if (student === undefined && record.record && typeof record.record === "object") {
+                student = record.record;
+            }
+            if (student === undefined && API_FIELDS.some((field) => field in record)) {
+                student = record;
+            }
+            if (student === undefined) {
+                const numberedKey = Object.keys(record).find((key) => /^\d+$/.test(key));
+                if (numberedKey !== undefined && typeof record[numberedKey] === "object") {
+                    recordNumber ??= numberedKey;
+                    student = record[numberedKey];
+                }
+            }
+
+            student = parseJsonValue(student);
+            if (Array.isArray(student)) {
+                student = student[0];
+            }
+            if (!student || typeof student !== "object") {
+                return null;
+            }
+
+            return { student, recordNumber };
+        }
+
+        function isEmptyData(data) {
+            const parsed = parseJsonValue(data);
+            return parsed == null || parsed === "" ||
+                (Array.isArray(parsed) && parsed.length === 0) ||
+                (typeof parsed === "object" && Object.keys(parsed).length === 0);
+        }
+
+        function isNotFound(response) {
+            const message = `${response.message || ""} ${response.error || ""}`;
+            return /data not found|record.*(not found|does not exist)|no matching record/i.test(message);
+        }
+
+        async function sendDatabaseRequest(endpoint, payload) {
+            const response = await fetch(`${DATABASE_URL}${endpoint}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                body: JSON.stringify(payload)
+            });
+            const responseText = await response.text();
+            let result;
+
+            try {
+                result = parseJsonValue(responseText);
+            } catch {
+                throw new Error("The database returned an unreadable response.");
+            }
+
+            if (!response.ok || !result || typeof result !== "object") {
+                throw new Error("The database request could not be completed.");
+            }
+            return result;
+        }
+
+        function assertRequestSucceeded(response) {
+            if (Number(response.status) !== 200) {
+                throw new Error(response.message || response.error || "The database rejected the request.");
+            }
+        }
+
+        async function lookupRollNo() {
+            const rollNo = rollNoInput.value.trim();
+            if (!rollNo || formState === "checking" || formState === "existing") {
+                return;
+            }
+
+            const version = ++requestVersion;
+            formState = "checking";
+            setBusy("Checking the student record...");
+
+            try {
+                const response = await sendDatabaseRequest("/api/irl", {
+                    token: CONNECTION_TOKEN,
+                    cmd: "GET_BY_KEY",
+                    dbName: DATABASE_NAME,
+                    rel: RELATION_NAME,
+                    jsonStr: { "Roll-No": rollNo }
+                });
+                if (version !== requestVersion) {
+                    return;
+                }
+
+                const foundRecord = extractStudentRecord(response);
+                if (foundRecord) {
+                    currentRecordNumber = foundRecord.recordNumber;
+                    API_FIELDS.slice(1).forEach((field, index) => {
+                        detailInputs[index].value = foundRecord.student[field] ?? "";
+                    });
+                    formState = "existing";
+                    setDetailsEnabled(true);
+                    setButtons({ update: true, reset: true });
+                    setStatus("Record found. Update the details or reset the form.");
+                    detailInputs[0].focus();
+                    return;
+                }
+
+                if (Number(response.status) === 200 && !isEmptyData(response.data)) {
+                    throw new Error("The matching record could not be read. Check the relation response format.");
+                }
+                if (Number(response.status) !== 200 && !isNotFound(response)) {
+                    throw new Error(response.message || response.error || "The lookup failed.");
+                }
+
+                formState = "new";
+                currentRecordNumber = null;
+                rollNoInput.disabled = false;
+                setDetailsEnabled(true);
+                setButtons({ save: true, reset: true });
+                setStatus("No record found. Enter the student details to save.");
+                detailInputs[0].focus();
+            } catch (error) {
+                if (version !== requestVersion) {
+                    return;
+                }
+                formState = "error";
+                rollNoInput.disabled = false;
+                setDetailsEnabled(false);
+                setButtons({ reset: true });
+                setStatus(error.message || "The lookup failed. Check your connection and try again.", "error");
+                rollNoInput.focus();
+            } finally {
+                if (version === requestVersion) {
+                    form.setAttribute("aria-busy", "false");
+                }
+            }
+        }
+
+        function collectStudentData() {
+            const inputs = [rollNoInput, ...detailInputs];
+            const values = {};
+
+            for (const input of inputs) {
+                const value = input.value.trim();
+                if (!value) {
+                    setStatus(`${input.labels[0].textContent.trim().replace("*", "")} is required.`, "error");
+                    input.focus();
+                    return null;
+                }
+                if (!input.validity.valid) {
+                    setStatus(`Enter a valid value for ${input.labels[0].textContent.trim().replace("*", "")}.`, "error");
+                    input.focus();
+                    return null;
+                }
+                values[input.name] = value;
+            }
+
+            return values;
+        }
+
+        async function saveStudent() {
+            if (formState !== "new") {
+                return;
+            }
+            const student = collectStudentData();
+            if (!student) {
+                return;
+            }
+
+            formState = "saving";
+            setBusy("Saving student record...");
+            try {
+                const response = await sendDatabaseRequest("/api/iml", {
+                    token: CONNECTION_TOKEN,
+                    cmd: "PUT",
+                    dbName: DATABASE_NAME,
+                    rel: RELATION_NAME,
+                    jsonStr: student
+                });
+                assertRequestSucceeded(response);
+                resetForm("Student record saved. Enter a Roll No. to continue.");
+            } catch (error) {
+                formState = "new";
+                rollNoInput.disabled = false;
+                setDetailsEnabled(true);
+                setButtons({ save: true, reset: true });
+                form.setAttribute("aria-busy", "false");
+                setStatus(error.message || "The student record could not be saved.", "error");
+            }
+        }
+
+        async function updateStudent() {
+            if (formState !== "existing") {
+                return;
+            }
+            const student = collectStudentData();
+            if (!student) {
+                return;
+            }
+
+            formState = "updating";
+            setBusy("Updating student record...");
+            const payload = currentRecordNumber !== null && currentRecordNumber !== undefined
+                ? {
+                    token: CONNECTION_TOKEN,
+                    cmd: "UPDATE",
+                    dbName: DATABASE_NAME,
+                    rel: RELATION_NAME,
+                    jsonStr: { [currentRecordNumber]: student }
+                }
+                : {
+                    token: CONNECTION_TOKEN,
+                    cmd: "SET",
+                    dbName: DATABASE_NAME,
+                    rel: RELATION_NAME,
+                    type: "PUT",
+                    primaryKey: "Roll-No",
+                    jsonStr: student
+                };
+
+            try {
+                const response = await sendDatabaseRequest("/api/iml", payload);
+                assertRequestSucceeded(response);
+                resetForm("Student record updated. Enter a Roll No. to continue.");
+            } catch (error) {
+                formState = "existing";
+                rollNoInput.disabled = true;
+                setDetailsEnabled(true);
+                setButtons({ update: true, reset: true });
+                form.setAttribute("aria-busy", "false");
+                setStatus(error.message || "The student record could not be updated.", "error");
+            }
+        }
+
+        rollNoInput.addEventListener("blur", lookupRollNo);
+        rollNoInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                lookupRollNo();
+            }
+        });
+        rollNoInput.addEventListener("input", () => {
+            if (formState === "new") {
+                detailInputs.forEach((input) => {
+                    input.value = "";
+                });
+                formState = "initial";
+                currentRecordNumber = null;
+                setDetailsEnabled(false);
+                setButtons();
+            }
+            if (formState === "error") {
+                formState = "initial";
+                setButtons();
+            }
+            setStatus("");
+        });
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (event.submitter === updateButton || (!event.submitter && formState === "existing")) {
+                updateStudent();
+            } else {
+                saveStudent();
+            }
+        });
+
+        resetButton.addEventListener("click", () => resetForm());
+
+        resetForm();
+    </script>
+</body>
+
+</html>
